@@ -22,7 +22,7 @@ int main(int argc,char ** argv){
     /*Checking we have enough arguments*/
     if (argc < 2){
         message = "Not enough arugments, expected: <client-name> <port>\n";
-        better_write(1, message, sizeof(message));
+        better_write(1, message, strlen(message));
         return 1;
     }
     port_name = argv[1];
@@ -41,14 +41,15 @@ int main(int argc,char ** argv){
         fprintf(stderr, "Error: could not create socket\n");
         return 1;
     }
-    struct sockaddr_in client;
-    memset(&client, 0, sizeof(client));
-    client.sin_family = AF_INET;
-    client.sin_addr.s_addr = htonl(INADDR_ANY);
-    client.sin_port = htons(port_number);
+    struct sockaddr_in serveraddr;
+
+    memset(&serveraddr, 0, sizeof(serveraddr));
+    serveraddr.sin_family = AF_INET;
+    serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serveraddr.sin_port = htons(port_number);
 
     /* we are binding the socket file descriptor */
-    if (bind(socket_fd, (struct sockaddr *) &client, sizeof(client) < 0)){
+    if (bind(socket_fd, (struct sockaddr *) &serveraddr, sizeof(serveraddr)) < 0){
         fprintf(stderr, "Error: Could not bind socket\n");
         if (close(socket_fd) < 0){
             fprintf(stderr, "Error: could not close socket fd.\n");
@@ -59,9 +60,8 @@ int main(int argc,char ** argv){
 
 
     ssize_t recv_length;
-    socklen_t addr_len = sizeof(client);
     while(1){
-        recv_length = recvfrom(socket_fd, buf, 0,  sizeof(buf), (struct sockaddr *) &client, &addr_len);
+        recv_length = recv(socket_fd, buf, sizeof(buf), 0);
         if(recv_length < 0){
             fprintf(stderr, "Error: could not receive from client.");
             return 1;

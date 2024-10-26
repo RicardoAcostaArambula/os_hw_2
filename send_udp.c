@@ -10,13 +10,15 @@
 ssize_t better_write(int fd, const char *buf, size_t count);
 int reading_and_sending(int socket_fd, char *buf);
 
-#define SIZE 460
+#define SIZE 480
 int main(int argc, char ** argv){
-    char *server_name, *port_name;
+    char *server_name, *port_name, *message;
     int socket_fd, gai_code;
     char buf[SIZE];
     if (argc < 3){
-        fprintf(stderr, "Not enough arugments, expected: <server-name> <port>\n");
+        // fprintf(stderr, "Not enough arugments, expected: <server-name> <port>\n");
+        message = "Not enough arugments, expected: <server-name> <port>\n";
+        better_write(1, message, strlen(message));
         return 1;
     }
     server_name = argv[1];
@@ -44,18 +46,18 @@ int main(int argc, char ** argv){
     */
     for (current = result; current != NULL; current = current->ai_next){
         if (connect(socket_fd, current->ai_addr, current->ai_addrlen) == 0){
-        break;
+            break;
         }
     }
 
     
     if (current==NULL){
-        fprintf(stderr, "Error: could not connect.");
+        fprintf(stderr, "Error: could not connect.\n");
         freeaddrinfo(result);
         return 1;
     }
     if (reading_and_sending(socket_fd, buf) > 0){
-        fprintf(stderr, "Error: could not read.");
+        fprintf(stderr, "Error: could not read.\n");
         return 1;
     }
     freeaddrinfo(result);
@@ -65,17 +67,18 @@ int main(int argc, char ** argv){
 int reading_and_sending(int socket_fd, char *buf){
     ssize_t read_res;
     ssize_t bytes_sent;
-    while ((read_res = read(0, buf, sizeof(buf)) > 0)){
+    while ((read_res = read(0, buf, sizeof(buf))) > 0){
         if (read_res < ((ssize_t) 0)) {
         /* There has been an error on read() */
             fprintf(stderr, "Error using read: %s\n", strerror(errno));
             return 1;
         }
 
-        bytes_sent = send(socket_fd, buf, sizeof(buf), 0);
+        bytes_sent = send(socket_fd, buf, read_res, 0);
         if ( bytes_sent < 0) {
             /* There has been an error on send() */
             fprintf(stderr, "Error using send: %s\n",strerror(errno));
+            close(socket_fd);
             return 1;
         }
     }
