@@ -12,12 +12,11 @@ int reading_and_sending(int socket_fd, char *buf);
 
 #define SIZE 460
 int main(int argc, char ** argv){
-    char *message, *server_name, *port_name;
+    char *server_name, *port_name;
     int socket_fd, gai_code;
     char buf[SIZE];
     if (argc < 3){
-        message = "Not enough arugments, expected: <server-name> <port>\n";
-        better_write(1, message, sizeof(message));
+        fprintf(stderr, "Not enough arugments, expected: <server-name> <port>\n");
         return 1;
     }
     server_name = argv[1];
