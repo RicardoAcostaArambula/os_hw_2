@@ -26,7 +26,7 @@ int main(int argc, char **argv){
     /*We are converting the port name */
     if (convert_port_name(&port_number, port_name) < 0){
         message = "Could not get the port number\n";
-        better_write(1, message, sizeof(message));
+        better_write(1, message, strlen(message));
         return 1;
     }
 
@@ -53,9 +53,10 @@ int main(int argc, char **argv){
         return 1;
     }
     ssize_t recv_length;
-    while(1){
+    // printf("reached 1\n");
+    while (1){
         recv_length = recvfrom(socket_fd, buf, sizeof(buf), 0, (struct sockaddr *) &clientaddr, &clientaddr_len);
-        
+        // printf("length: %ld\n", recv_length);
         if(recv_length < 0){
             fprintf(stderr, "Error: could not receive from client.");
             return 1;

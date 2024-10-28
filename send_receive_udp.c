@@ -62,12 +62,12 @@ int main(int argc, char **argv){
         return 1;
     }
 
-    if (reading_and_sending(socket_fd, buf_in) > 0){
-        fprintf(stderr, "Error: could not read.\n");
-        close(socket_fd);
-        freeaddrinfo(result);
-        return 1;
-    }
+    // if (reading_and_sending(socket_fd, buf_in) > 0){
+    //     fprintf(stderr, "Error: could not read.\n");
+    //     close(socket_fd);
+    //     freeaddrinfo(result);
+    //     return 1;
+    // }
     /**
      * TO-DO
      * We have read and send, 
@@ -75,39 +75,35 @@ int main(int argc, char **argv){
      * Reading and writing needs to be done at the same time using select which is the next step
     */
 
-
-
-
-   fd_set read_fds; 
+    fd_set read_fds; 
 
     int max_fds = socket_fd > STDIN_FILENO ?  socket_fd : STDIN_FILENO; 
     int ready;
-
     while (1) {
         FD_ZERO(&read_fds);
         FD_SET(STDIN_FILENO, &read_fds);
         FD_SET(socket_fd, &read_fds);
         ready = select(max_fds + 1, &read_fds, NULL, NULL, NULL);
         if (ready < 0){
-            message = "Error: select failed";
+            message = "Error: select failed\n";
             better_write(1, message, strlen(message));
             res = 1;
             goto end;
         }
         if (FD_ISSET(STDIN_FILENO, &read_fds)){
+            
             if (reading_and_sending(socket_fd, buf_in)==1){
-                message = "Error: an error occurred when reading and sending";
+                message = "Error: an error occurred when reading and sending\n";
                 better_write(1, message, strlen(message));
                 res = 1;
                 goto end;
             }   
         }
         ssize_t recv_length;
-
         if (FD_ISSET(socket_fd, &read_fds)){
             recv_length = recv(socket_fd, buf_recv, sizeof(buf_recv), 0);
             if (recv_length < 0){
-                fprintf(stderr, "Error: could not receive from client.");
+                fprintf(stderr, "Error: could not receive from client.\n");
                 res = 1;
                 goto end;
             }
@@ -116,7 +112,7 @@ int main(int argc, char **argv){
             }
             /*Once we read, we write to standard output with better write*/
             if (better_write(1, buf_recv, recv_length) < 0){
-                fprintf(stderr, "Error: could not write.");
+                fprintf(stderr, "Error: could not write.\n");
                 close(socket_fd);
                 res = 1;
                 goto end;
@@ -156,7 +152,7 @@ int reading_and_sending(int socket_fd, char *buf){
         close(socket_fd);
         return 1;
     }
-    close(socket_fd);
+    // close(socket_fd);
     return 0;
 }
 
