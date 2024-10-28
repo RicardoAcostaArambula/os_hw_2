@@ -14,7 +14,7 @@
 
 /*function delcarations*/
 ssize_t better_write(int fd, const char *buf, size_t count);
-int reading_and_sending(int socket_fd, char *buf);
+int reading_and_sending(int socket_fd, char *buf, int buff_size);
 
 int main(int argc, char **argv){
     char *server_name, *port_name, *message;
@@ -92,7 +92,7 @@ int main(int argc, char **argv){
         }
         if (FD_ISSET(STDIN_FILENO, &read_fds)){
             
-            if (reading_and_sending(socket_fd, buf_in)==1){
+            if (reading_and_sending(socket_fd, buf_in, INPUT_BUFF_SIZE)==1){
                 message = "Error: an error occurred when reading and sending\n";
                 better_write(1, message, strlen(message));
                 res = 1;
@@ -127,10 +127,10 @@ int main(int argc, char **argv){
     return res;
 }
 
-int reading_and_sending(int socket_fd, char *buf){
+int reading_and_sending(int socket_fd, char *buf, int buff_size){
     ssize_t read_res;
     ssize_t bytes_sent;
-    while ((read_res = read(0, buf, sizeof(buf))) > 0){
+    while ((read_res = read(0, buf, buff_size)) > 0){
         if (read_res < ((ssize_t) 0)) {
         /* There has been an error on read() */
             fprintf(stderr, "Error using read: %s\n", strerror(errno));

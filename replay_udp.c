@@ -55,7 +55,8 @@ int main(int argc, char **argv){
     ssize_t recv_length;
     // printf("reached 1\n");
     while (1){
-        recv_length = recvfrom(socket_fd, buf, sizeof(buf), 0, (struct sockaddr *) &clientaddr, &clientaddr_len);
+        // recv_length = recvfrom(socket_fd, buf, sizeof(buf), 0, (struct sockaddr *) &clientaddr, &clientaddr_len);
+        recv_length = recvfrom(socket_fd, buf, SIZE, 0, (struct sockaddr *) &clientaddr, &clientaddr_len);
         // printf("length: %ld\n", recv_length);
         if(recv_length < 0){
             fprintf(stderr, "Error: could not receive from client.");
