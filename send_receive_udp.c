@@ -14,6 +14,7 @@
 
 /*function delcarations*/
 ssize_t better_write(int fd, const char *buf, size_t count);
+int reading_and_sending(int socket_fd, char *buf);
 
 int main(int argc, char **argv){
     char *server_name, *port_name, *message;
