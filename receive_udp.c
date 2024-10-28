@@ -21,7 +21,7 @@ int main(int argc,char ** argv){
     char buf[SIZE];
     /*Checking we have enough arguments*/
     if (argc < 2){
-        message = "Not enough arugments, expected: <client-name> <port>\n";
+        message = "Not enough arugments, expected: <port>\n";
         better_write(1, message, strlen(message));
         return 1;
     }
@@ -56,9 +56,7 @@ int main(int argc,char ** argv){
         }
         return 1;
     }
-    /*We need to read now from the port*/
-
-
+    /*Reading from the port*/
     ssize_t recv_length;
     while(1){
         recv_length = recv(socket_fd, buf, sizeof(buf), 0);
@@ -69,6 +67,7 @@ int main(int argc,char ** argv){
         if (recv_length == 0){
             break;
         }
+        /*Once we read, we write to standard output with better write*/
         if (better_write(1, buf, recv_length) < 0){
             fprintf(stderr, "Error: could not write.");
             close(socket_fd);

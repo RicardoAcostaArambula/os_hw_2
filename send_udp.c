@@ -16,7 +16,6 @@ int main(int argc, char ** argv){
     int socket_fd, gai_code;
     char buf[SIZE];
     if (argc < 3){
-        // fprintf(stderr, "Not enough arugments, expected: <server-name> <port>\n");
         message = "Not enough arugments, expected: <server-name> <port>\n";
         better_write(1, message, strlen(message));
         return 1;
@@ -58,8 +57,12 @@ int main(int argc, char ** argv){
     }
     if (reading_and_sending(socket_fd, buf) > 0){
         fprintf(stderr, "Error: could not read.\n");
+        close(socket_fd);
+        freeaddrinfo(result);
         return 1;
     }
+
+    close(socket_fd);
     freeaddrinfo(result);
     return 0;
 }
