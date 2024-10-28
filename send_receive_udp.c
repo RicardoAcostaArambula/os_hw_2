@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <string.h>
+#include <sys/select.h>
 
 #define INPUT_BUFF_SIZE 480
 
@@ -17,8 +18,9 @@ ssize_t better_write(int fd, const char *buf, size_t count);
 int main(int argc, char **argv){
     char *server_name, *port_name, *message;
     int socket_fd, gai_code;
-    char buf[INPUT_BUFF_SIZE];
-    char buf[RECV_BUFF_SIZE];
+    char buf_in[INPUT_BUFF_SIZE];
+    char buf_recv[RECV_BUFF_SIZE];
+    int res = 0; 
     if (argc < 3){
         // fprintf(stderr, "Not enough arugments, expected: <server-name> <port>\n");
         message = "Not enough arugments, expected: <server-name> <port>\n";
@@ -59,7 +61,7 @@ int main(int argc, char **argv){
         return 1;
     }
 
-    if (reading_and_sending(socket_fd, buf) > 0){
+    if (reading_and_sending(socket_fd, buf_in) > 0){
         fprintf(stderr, "Error: could not read.\n");
         close(socket_fd);
         freeaddrinfo(result);
@@ -75,15 +77,57 @@ int main(int argc, char **argv){
 
 
 
+   fd_set read_fds; 
 
+    int max_fds = socket_fd > STDIN_FILENO ?  socket_fd : STDIN_FILENO; 
+    int ready;
 
+    while (1) {
+        FD_ZERO(&read_fds);
+        FD_SET(STDIN_FILENO, &read_fds);
+        FD_SET(socket_fd, &read_fds);
+        ready = select(max_fds + 1, &read_fds, NULL, NULL, NULL);
+        if (ready < 0){
+            message = "Error: select failed";
+            better_write(1, message, strlen(message));
+            res = 1;
+            goto end;
+        }
+        if (FD_ISSET(STDIN_FILENO, &read_fds)){
+            if (reading_and_sending(socket_fd, buf_in)==1){
+                message = "Error: an error occurred when reading and sending";
+                better_write(1, message, strlen(message));
+                res = 1;
+                goto end;
+            }   
+        }
+        ssize_t recv_length;
 
+        if (FD_ISSET(socket_fd, &read_fds)){
+            recv_length = recv(socket_fd, buf_recv, sizeof(buf_recv), 0);
+            if (recv_length < 0){
+                fprintf(stderr, "Error: could not receive from client.");
+                res = 1;
+                goto end;
+            }
+            if (recv_length == 0){
+                break;
+            }
+            /*Once we read, we write to standard output with better write*/
+            if (better_write(1, buf_recv, recv_length) < 0){
+                fprintf(stderr, "Error: could not write.");
+                close(socket_fd);
+                res = 1;
+                goto end;
+            }
+        }
+    }
 
-
+    end:
 
     close(socket_fd);
     freeaddrinfo(result);
-    return 0;
+    return res;
 }
 
 int reading_and_sending(int socket_fd, char *buf){

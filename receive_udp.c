@@ -60,7 +60,7 @@ int main(int argc,char ** argv){
     ssize_t recv_length;
     while(1){
         recv_length = recv(socket_fd, buf, sizeof(buf), 0);
-        if(recv_length < 0){
+        if (recv_length < 0){
             fprintf(stderr, "Error: could not receive from client.");
             return 1;
         }
