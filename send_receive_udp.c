@@ -101,7 +101,8 @@ int main(int argc, char **argv){
         }
         ssize_t recv_length;
         if (FD_ISSET(socket_fd, &read_fds)){
-            recv_length = recv(socket_fd, buf_recv, sizeof(buf_recv), 0);
+            // recv_length = recv(socket_fd, buf_recv, sizeof(buf_recv), 0);
+            recv_length = recv(socket_fd, buf_recv, RECV_BUFF_SIZE, 0);
             if (recv_length < 0){
                 fprintf(stderr, "Error: could not receive from client.\n");
                 res = 1;
