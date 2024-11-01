@@ -3,7 +3,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <string.h>
- #include <unistd.h>
+#include <unistd.h>
 #include <netdb.h>
 #define SIZE 65536
 /*Function declarations*/
@@ -23,7 +23,7 @@ int main(int argc, char **argv){
         return 1;
     }
     port_name = argv[1];
-    /*We are converting the port name */
+    /*We are converting the port name to a number*/
     if (convert_port_name(&port_number, port_name) < 0){
         message = "Could not get the port number\n";
         better_write(1, message, strlen(message));
