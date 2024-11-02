@@ -70,9 +70,9 @@ int main(int argc, char ** argv){
 int reading_and_sending(int socket_fd, char *buf){
     ssize_t read_res;
     ssize_t bytes_sent;
-    while ((read_res = read(0, buf, sizeof(buf))) > 0){
+    while ((read_res = read(0, buf, SIZE)) > 0){
         if (read_res < ((ssize_t) 0)) {
-        /* There has been an error on read() */
+            /* There has been an error on read() */
             fprintf(stderr, "Error using read: %s\n", strerror(errno));
             return 1;
         }
